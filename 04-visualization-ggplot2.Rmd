@@ -7,7 +7,7 @@ minutes: 60
 
 ```{r setup, echo=FALSE, purl=FALSE}
 source("setup.R")
-surveys_complete <- read_csv(file = "data_output/surveys_complete.csv", col_types = cols())
+ 
 ```
 
 ```{r, echo=FALSE, purl=TRUE}
@@ -19,11 +19,23 @@ surveys_complete <- read_csv(file = "data_output/surveys_complete.csv", col_type
 
 > ### Learning Objectives
 >
-> * Produce scatter plots, boxplots, and time series plots using ggplot.
-> * Set universal plot settings.
-> * Describe what faceting is and apply faceting in ggplot.
-> * Modify the aesthetics of an existing ggplot plot (including axis labels and color).
-> * Build complex and customized plots from data in a data frame.
+> * Know the role of data, aesthetics, and geoms in ggplot functions
+> * Choose the correct aesthetics and alter the geom parameters for a scatter plot
+> * Choose the correct aesthetics and alter the geom parameters for a histogram
+> * Choose the correct aesthetics and alter the geom parameters for a box plot
+> * Choose the correct aesthetics and alter the geom parameters for a line plot 
+> * Apply additional aesthetics to a plot
+> * Apply additional geoms to a plot
+> * Change plot scales
+> * Change titles and subtitles
+> * Change plot themes
+> * Change plot text fonts, layout, and orientation
+> * Apply a facet a plot
+> * Apply additional ggplot2-compatible plotting libraries 
+> * Able to save a ggplot
+> * List several resources for getting help with ggplot
+> * List several resources for creating informative scientific plots
+> * Use the VCF data to create several figures
 
 --------------
 
@@ -37,7 +49,7 @@ If not still in the workspace, load the data we saved in the previous lesson.
 
 
 ```{r load-data, eval=FALSE, purl=FALSE}
-surveys_complete <- read_csv("data_output/surveys_complete.csv")
+metadata<- read_csv("data/Ecoli_metadata.csv")
 ```
 
 ## Plotting with **`ggplot2`**
@@ -64,13 +76,13 @@ ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) +  <GEOM_FUNCTION>()
       `data` argument
 
 ```{r, eval=FALSE, purl=FALSE}
-ggplot(data = surveys_complete)
+ggplot(data =metadata)
 ```
 
 - define a mapping (using the aesthetic (`aes`) function), by selecting the variables to be plotted and specifying how to present them in the graph, e.g. as x/y positions or characteristics such as size, shape, color, etc.
 
 ```{r, eval=FALSE, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length))
+ggplot(data =metadata, aes(x = sample, y = generation))
 ```
 
 - add 'geoms' – graphical representations of the data in the plot (points,
@@ -85,7 +97,7 @@ To add a geom to the plot use the `+` operator. Because we have two continuous v
 let's use `geom_point()` first:
 
 ```{r first-ggplot, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
+ggplot(data =metadata, aes(x = sample, y = generation))+
   geom_point()
 ```
 
@@ -96,17 +108,17 @@ plot can also be generated with code like this:
 
 ```{r, first-ggplot-with-plus, eval=FALSE, purl=FALSE}
 # Assign plot to a variable
-surveys_plot <- ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length))
+metadata_plot <- ggplot(data =metadata, aes(x = sample, y = generation))
 
 # Draw the plot
-surveys_plot + 
+metadata_plot + 
     geom_point()
 ```
 
 ```{r, eval=FALSE, purl=TRUE, echo=FALSE, purl=FALSE}
 # Create a ggplot and draw it
-surveys_plot <- ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length))
-surveys_plot + 
+metadata_plot <- ggplot(data =metadata, aes(x = sample, y = generation))
+metadata_plot  + 
     geom_point()
 ```
 
@@ -124,18 +136,18 @@ error message.
 
 ```{r, ggplot-with-plus-position, eval=FALSE, purl=FALSE}
 # This is the correct syntax for adding layers
-surveys_plot +
+metadata_plot  +
   geom_point()
 
 # This will not add the new layer and will return an error message
-surveys_plot
+metadata_plot 
   + geom_point()
 ```
 
 > ### Challenge (optional)
 >
 > Scatter plots can be useful exploratory tools for small datasets. For data
-> sets with large numbers of observations, such as the `surveys_complete` data
+> sets with large numbers of observations, such as the `metadata` data
 > set, overplotting of points can be a limitation of scatter plots. One strategy
 > for handling such settings is to use hexagonal binning of observations. The
 > plot space is tessellated into hexagons. Each hexagon is assigned a color
@@ -171,7 +183,7 @@ library(hexbin)
 
 ## Then use the `geom_hex()` function:
 
-surveys_plot +
+metadata_plot +
     geom_hex()
 
 ## What are the relative strengths and weaknesses of a hexagonal bin
@@ -184,7 +196,7 @@ Building plots with **`ggplot2`** is typically an iterative process. We start by
 defining the dataset we'll use, lay out the axes, and choose a geom:
 
 ```{r create-ggplot-object, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
+ggplot(data =metadata, aes(x = sample, y = generation)) +
     geom_point()
 ```
 
@@ -192,14 +204,14 @@ Then, we start modifying this plot to extract more information from it. For
 instance, we can add transparency (`alpha`) to avoid overplotting:
 
 ```{r adding-transparency, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
+ggplot(data =metadata, aes(x = sample, y = generation)) +
     geom_point(alpha = 0.1)
 ```
 
 We can also add colors for all the points:
 
 ```{r adding-colors, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
+ggplot(data =metadata, aes(x = sample, y = generation)) +
     geom_point(alpha = 0.1, color = "blue")
 ```
 
@@ -207,8 +219,8 @@ Or to color each species in the plot differently, you could use a vector as an i
 
 
 ```{r color-by-species, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
-    geom_point(alpha = 0.1, aes(color = species_id))
+ggplot(data =metadata, aes(x = sample, y = generation)) +
+    geom_point(alpha = 0.1, aes(color = strain))
 ```
 
 > ### Challenge
@@ -217,7 +229,7 @@ ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
 > `species_id` with the plot types showing in different colors. Is this a good
 > way to show this type of data?
 > ```{r scatter-challenge, answer=TRUE, purl=FALSE}
-> ggplot(data = surveys_complete, aes(x = species_id, y = weight)) +
+> ggplot(data = metadata, aes(x = species_id, y = weight)) +
 >    geom_point(aes(color = species_id))
 > ```
 
@@ -227,7 +239,7 @@ ggplot(data = surveys_complete, aes(x = weight, y = hindfoot_length)) +
 We can use boxplots to visualize the distribution of weight within each species:
 
 ```{r boxplot, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = species_id, y = weight)) +
+ggplot(data =metadata, aes(x = sample, y = generation))+
     geom_boxplot()
 ```
 
@@ -235,7 +247,7 @@ By adding points to boxplot, we can have a better idea of the number of
 measurements and of their distribution:
 
 ```{r boxplot-with-points, purl=FALSE}
-ggplot(data = surveys_complete, aes(x = species_id, y = weight)) +
+ggplot(data =metadata, aes(x = sample, y = generation))+
     geom_boxplot(alpha = 0) +
     geom_jitter(alpha = 0.3, color = "tomato")
 ```
@@ -275,7 +287,7 @@ hidden?
 ```{r boxplot-challenge, eval=FALSE, purl=TRUE, echo=FALSE}
 ## Challenge with boxplots:
 ##  Start with the boxplot we created:
-ggplot(data = surveys_complete, aes(x = species_id, y = weight)) +
+ggplot(data =metadata, aes(x = sample, y = generation)) +
   geom_boxplot(alpha = 0) +
   geom_jitter(alpha = 0.3, color = "tomato")
 
@@ -300,7 +312,7 @@ Let's calculate number of counts per year for each species. First we need
 to group the data and count records within each group:
 
 ```{r, purl=FALSE}
-yearly_counts <- surveys_complete %>%
+yearly_counts <- metadata%>%
                  group_by(year, species_id) %>%
                  tally()
 ```
@@ -346,7 +358,7 @@ measured. To do that we need to make counts in the data frame grouped by `year`,
 `species_id`, and `sex`:
 
 ```{r, purl=FALSE}
- yearly_sex_counts <- surveys_complete %>%
+ yearly_sex_counts <- metadata%>%
                       group_by(year, species_id, sex) %>%
                       tally()
 ```
@@ -394,7 +406,7 @@ themes.
 > of each species changes through the years.
 > 
 > ```{r average-weight-time-series, answer=TRUE, purl=FALSE}
-> yearly_weight <- surveys_complete %>%
+> yearly_weight <- metadata%>%
 >                 group_by(year, species_id) %>%
 >                  summarize(avg_weight = mean(weight))
 > ggplot(data = yearly_weight, aes(x=year, y=avg_weight)) +
@@ -423,7 +435,7 @@ has changed through time:
 
 ```{r average-weight-time-facet-sex-rows, purl=FALSE}
 # One column, facet by rows
-yearly_sex_weight <- surveys_complete %>%
+yearly_sex_weight <- metadata%>%
     group_by(year, sex, species_id) %>%
     summarize(avg_weight = mean(weight))
 ggplot(data = yearly_sex_weight, aes(x = year, y = avg_weight, color = species_id)) +
@@ -502,7 +514,7 @@ an object to be able to easily apply them to other plots you may create:
 grey_theme <- theme(axis.text.x = element_text(colour = "grey20", size = 12, angle = 90, hjust = 0.5, vjust = 0.5),
                           axis.text.y = element_text(colour = "grey20", size = 12),
                           text = element_text(size = 16))
-ggplot(surveys_complete, aes(x = species_id, y = hindfoot_length)) +
+ggplot(metadata, aes(x = species_id, y = hindfoot_length)) +
     geom_boxplot() +
     grey_theme
 ```
@@ -526,7 +538,7 @@ Faceting is a great tool for splitting one plot into multiple plots, but sometim
 ```{r gridarrange-example, message=FALSE, purl=FALSE, fig.width=10}
 library(gridExtra)
 
-spp_weight_boxplot <- ggplot(data = surveys_complete, aes(x = species_id, y = weight)) +
+spp_weight_boxplot <- ggplot(data = metadata, aes(x = species_id, y = weight)) +
   geom_boxplot() +
   xlab("Species") + ylab("Weight (g)") +
   scale_y_log10()
